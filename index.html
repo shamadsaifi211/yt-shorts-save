@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YTShortsSave – Free YouTube Shorts Downloader No Watermark</title>
+  <meta name="description" content="Download YouTube Shorts videos free in HD quality. No watermark, no signup, no app needed. Paste link and download instantly on any device."/>
+  <meta name="keywords" content="youtube shorts downloader, download youtube shorts, youtube shorts download free, no watermark, HD download"/>
+  <meta name="robots" content="index, follow"/>
+  <meta property="og:title" content="YTShortsSave – Free YouTube Shorts Downloader"/>
+  <meta property="og:description" content="Download YouTube Shorts free, no watermark, no signup."/>
+  <meta property="og:type" content="website"/>
+  <link rel="canonical" href="https://shamadsaifi211.github.io/ytshortssave/"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #ff0000; --red2: #cc0000;
+      --bg: #ffffff; --surface: #f7f7f7;
+      --border: #e5e5e5; --text: #111111; --muted: #666666;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* NAV */
+    nav { background: #fff; border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+    .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo-icon { width: 32px; height: 32px; background: var(--red); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
+    .logo-text { font-size: 18px; font-weight: 700; color: var(--text); }
+    .logo-text span { color: var(--red); }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* HERO */
+    .hero { background: linear-gradient(180deg, #fff5f5 0%, #fff 100%); padding: 64px 24px 56px; text-align: center; border-bottom: 1px solid var(--border); }
+    h1 { font-size: clamp(26px, 5vw, 44px); font-weight: 700; line-height: 1.2; margin-bottom: 14px; }
+    h1 span { color: var(--red); }
+    .hero > p { font-size: 16px; color: var(--muted); max-width: 520px; margin: 0 auto 36px; line-height: 1.6; }
+
+    /* INPUT */
+    .input-section { max-width: 640px; margin: 0 auto; width: 100%; }
+    .input-box { display: flex; background: #fff; border: 2px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.25s, box-shadow 0.25s; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .input-box:focus-within { border-color: var(--red); box-shadow: 0 0 0 4px rgba(255,0,0,0.08); }
+    #urlInput { flex: 1; border: none; outline: none; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--text); padding: 16px 18px; background: transparent; }
+    #urlInput::placeholder { color: #bbb; }
+    #startBtn { background: var(--red); border: none; color: white; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 15px; padding: 0 28px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+    #startBtn:hover { background: var(--red2); }
+    #startBtn:disabled { background: #ccc; cursor: not-allowed; }
+    .supported { margin-top: 12px; font-size: 12px; color: #aaa; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+    /* LOADER */
+    #loader { display: none; text-align: center; padding: 32px 0; }
+    .spin { display: inline-block; width: 36px; height: 36px; border: 3px solid #eee; border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* RESULT */
+    #result { display: none; max-width: 640px; margin: 28px auto 0; padding: 0 24px 32px; }
+    .result-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+    .video-thumb { position: relative; }
+    .video-thumb img { width: 100%; height: 200px; object-fit: cover; display: block; }
+    .play-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); }
+    .play-circle { width: 54px; height: 54px; background: var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; }
+    .video-body { padding: 20px 22px; }
+    .video-title { font-size: 15px; font-weight: 600; margin-bottom: 5px; line-height: 1.4; }
+    .video-author { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .dl-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; }
+    .dl-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .dl-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 18px;
+      text-decoration: none; color: var(--text);
+      transition: all 0.2s; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 14px;
+    }
+    .dl-btn:hover { border-color: var(--red); background: #fff5f5; transform: translateX(2px); }
+    .dl-left { display: flex; align-items: center; gap: 12px; }
+    .dl-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; flex-shrink: 0; }
+    .dl-icon.video { background: var(--red); }
+    .dl-icon.audio { background: #7c3aed; }
+    .dl-name { font-weight: 600; font-size: 14px; }
+    .dl-sub { font-size: 12px; color: var(--muted); }
+    .dl-arrow { color: #ccc; font-size: 20px; }
+
+    /* ERROR */
+    #error { display: none; max-width: 640px; margin: 24px auto 0; padding: 0 24px; }
+    .error-box { background: #fff5f5; border: 1px solid #ffd0d0; border-radius: 10px; padding: 16px 20px; color: #cc0000; font-size: 14px; text-align: center; }
+
+    /* HOW TO */
+    .section { max-width: 800px; margin: 64px auto 0; padding: 0 24px; }
+    .section h2 { font-size: 26px; font-weight: 700; text-align: center; margin-bottom: 36px; }
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 20px; text-align: center; }
+    .step-num { width: 42px; height: 42px; background: var(--red); color: white; font-weight: 700; font-size: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+    .step-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .step-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* FEATURES */
+    .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+    .feat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .feat-emoji { font-size: 28px; margin-bottom: 10px; }
+    .feat-title { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+    .feat-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+    /* FAQ */
+    .faq-wrap { max-width: 700px; margin: 64px auto 0; padding: 0 24px 80px; }
+    .faq-wrap h2 { font-size: 26px; font-weight: 700; text-align: center; margin-bottom: 28px; }
+    .faq-item { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .faq-q { padding: 16px 18px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+    .faq-q:hover { background: var(--surface); }
+    .faq-a { display: none; padding: 0 18px 16px; font-size: 13px; color: var(--muted); line-height: 1.6; background: #fff; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-arrow { transition: transform 0.2s; font-size: 11px; color: var(--muted); }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+    footer { background: var(--surface); border-top: 1px solid var(--border); text-align: center; padding: 24px; font-size: 12px; color: var(--muted); margin-top: auto; }
+    footer a { color: var(--muted); text-decoration: none; margin: 0 8px; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      nav { padding: 0 18px; }
+      .nav-links { display: none; }
+      .steps-grid { grid-template-columns: 1fr; }
+      #startBtn { padding: 0 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-icon">▶</div>
+    <span class="logo-text">YT<span>ShortsSave</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">How to Use</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <h1>Free YouTube <span>Shorts</span> Downloader</h1>
+  <p>Download any YouTube Shorts video instantly in HD — no watermark, no signup, completely free on any device.</p>
+
+  <div class="input-section">
+    <div class="input-box">
+      <input type="text" id="urlInput" placeholder="Paste YouTube Shorts URL here..."/>
+      <button id="startBtn" onclick="startDownload()">Start ↓</button>
+    </div>
+    <div class="supported">
+      <span>✓ youtube.com/shorts/</span>
+      <span>✓ youtu.be</span>
+      <span>✓ HD Quality</span>
+      <span>✓ MP3 Audio</span>
+    </div>
+  </div>
+
+  <div id="loader">
+    <div class="spin"></div>
+    <p style="color:#999;font-size:14px;">Fetching video info...</p>
+  </div>
+</div>
+
+<div id="error"><div class="error-box" id="errorMsg"></div></div>
+
+<div id="result">
+  <div class="result-card">
+    <div class="video-thumb">
+      <img id="vThumb" src="" alt="video thumbnail"/>
+      <div class="play-overlay"><div class="play-circle">▶</div></div>
+    </div>
+    <div class="video-body">
+      <div class="video-title" id="vTitle"></div>
+      <div class="video-author" id="vAuthor"></div>
+      <div class="dl-label">Choose Download Option</div>
+      <div class="dl-list" id="dlList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW TO USE -->
+<div class="section" id="how">
+  <h2>How to Download YouTube Shorts?</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Copy the URL</div>
+      <div class="step-desc">Open YouTube, find a Shorts video, copy the URL from address bar.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">Paste & Start</div>
+      <div class="step-desc">Paste the URL in the box above and click the Start button.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">Download!</div>
+      <div class="step-desc">Click your preferred quality and the video saves to your device.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section" style="margin-top:48px; padding-bottom:0;">
+  <h2>Why Use YTShortsSave?</h2>
+  <div class="feat-grid">
+    <div class="feat-card"><div class="feat-emoji">🚀</div><div class="feat-title">Instant & Free</div><div class="feat-desc">Download in seconds, always free</div></div>
+    <div class="feat-card"><div class="feat-emoji">🚫</div><div class="feat-title">No Watermark</div><div class="feat-desc">Clean video, no logos or overlays</div></div>
+    <div class="feat-card"><div class="feat-emoji">📱</div><div class="feat-title">All Devices</div><div class="feat-desc">Works on mobile, tablet, PC</div></div>
+    <div class="feat-card"><div class="feat-emoji">🔐</div><div class="feat-title">No Signup</div><div class="feat-desc">No account or registration needed</div></div>
+    <div class="feat-card"><div class="feat-emoji">🎬</div><div class="feat-title">HD Quality</div><div class="feat-desc">Up to 1080p Full HD</div></div>
+    <div class="feat-card"><div class="feat-emoji">🎵</div><div class="feat-title">MP3 Audio</div><div class="feat-desc">Extract audio from any Short</div></div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-wrap" id="faq">
+  <h2>Frequently Asked Questions</h2>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Is YTShortsSave free? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Yes! Completely free, no hidden charges or subscriptions.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Do I need to create an account? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">No account needed at all. Just paste the link and download.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">What quality are the downloads? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">We provide the highest available quality, usually up to 1080p Full HD.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Is there a watermark on downloaded videos? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">No! All downloaded videos are 100% clean with no watermarks.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Does it work on iPhone and Android? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Yes! YTShortsSave works perfectly on all browsers including Safari and Chrome on mobile.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Can I download audio only (MP3)? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Yes! We have an MP3 audio-only option available for every video.</div>
+  </div>
+</div>
+
+<footer>
+  <p style="margin-bottom:8px;">
+    <a href="/">Home</a>
+    <a href="#how">How to Use</a>
+    <a href="#faq">FAQ</a>
+  </p>
+  <p>© 2024 YTShortsSave · For personal use only · Please respect copyright laws</p>
+</footer>
+
+<script>
+  // Cobalt API — free, open source, actually works
+  const COBALT_API = "https://cobalt.tools/api/json";
+
+  function getVideoId(url) {
+    const patterns = [
+      /youtube\.com\/shorts\/([^?&/#\n]+)/,
+      /youtu\.be\/([^?&/#\n]+)/,
+      /youtube\.com\/watch\?v=([^&#\n]+)/,
+    ];
+    for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
+    return null;
+  }
+
+  function hideAll() {
+    ['loader','result','error'].forEach(id => document.getElementById(id).style.display = 'none');
+  }
+
+  function showError(msg) {
+    hideAll();
+    document.getElementById('errorMsg').textContent = '⚠️ ' + msg;
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('startBtn').disabled = false;
+  }
+
+  function toggleFaq(el) {
+    el.parentElement.classList.toggle('open');
+  }
+
+  async function startDownload() {
+    const url = document.getElementById('urlInput').value.trim();
+    const btn = document.getElementById('startBtn');
+
+    if (!url) { showError('Please paste a YouTube URL first.'); return; }
+    const videoId = getVideoId(url);
+    if (!videoId) { showError('Invalid URL. Please paste a valid YouTube Shorts link.'); return; }
+
+    hideAll();
+    document.getElementById('loader').style.display = 'block';
+    btn.disabled = true;
+
+    // Get video info via YouTube oEmbed (free, no API key needed)
+    let title = 'YouTube Shorts Video';
+    let author = '';
+    try {
+      const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/shorts/${videoId}&format=json`);
+      const meta = await res.json();
+      title = meta.title || title;
+      author = meta.author_name ? `by ${meta.author_name}` : '';
+    } catch {}
+
+    // Try Cobalt API for actual download link
+    let cobaltVideoUrl = null;
+    let cobaltAudioUrl = null;
+
+    try {
+      const cobaltRes = await fetch(COBALT_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ url: `https://www.youtube.com/shorts/${videoId}`, vQuality: '1080', isAudioOnly: false })
+      });
+      const cobaltData = await cobaltRes.json();
+      if (cobaltData.url) cobaltVideoUrl = cobaltData.url;
+    } catch {}
+
+    try {
+      const cobaltAudioRes = await fetch(COBALT_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ url: `https://www.youtube.com/shorts/${videoId}`, isAudioOnly: true })
+      });
+      const cobaltAudioData = await cobaltAudioRes.json();
+      if (cobaltAudioData.url) cobaltAudioUrl = cobaltAudioData.url;
+    } catch {}
+
+    hideAll();
+
+    // Show video info
+    document.getElementById('vTitle').textContent = title;
+    document.getElementById('vAuthor').textContent = author;
+    const thumb = document.getElementById('vThumb');
+    thumb.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    thumb.onerror = () => thumb.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
+    // Build download buttons
+    const dlList = document.getElementById('dlList');
+    dlList.innerHTML = '';
+
+    const options = [
+      {
+        icon: '🎬',
+        cls: 'video',
+        name: 'Download HD Video (MP4)',
+        sub: 'Best quality · No watermark',
+        url: cobaltVideoUrl || `https://cobalt.tools/?u=${encodeURIComponent(`https://www.youtube.com/shorts/${videoId}`)}`,
+      },
+      {
+        icon: '📥',
+        cls: 'video',
+        name: 'Download via Y2Mate',
+        sub: 'MP4 · Multiple qualities',
+        url: `https://www.y2mate.com/youtube/${videoId}`,
+      },
+      {
+        icon: '🎵',
+        cls: 'audio',
+        name: 'Download MP3 Audio Only',
+        sub: 'Audio only · High quality',
+        url: cobaltAudioUrl || `https://cobalt.tools/?u=${encodeURIComponent(`https://www.youtube.com/shorts/${videoId}`)}`,
+      },
+    ];
+
+    options.forEach(opt => {
+      const a = document.createElement('a');
+      a.href = opt.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.className = 'dl-btn';
+      a.innerHTML = `
+        <div class="dl-left">
+          <div class="dl-icon ${opt.cls}">${opt.icon}</div>
+          <div>
+            <div class="dl-name">${opt.name}</div>
+            <div class="dl-sub">${opt.sub}</div>
+          </div>
+        </div>
+        <span class="dl-arrow">›</span>
+      `;
+      dlList.appendChild(a);
+    });
+
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    btn.disabled = false;
+  }
+
+  document.getElementById('urlInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startDownload();
+  });
+</script>
+</body>
+</html>
